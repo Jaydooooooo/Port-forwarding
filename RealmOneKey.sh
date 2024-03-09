@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# 初始化realm状态变量
-realm_status="未安装"
-realm_status_color="\033[0;31m" # 红色
+# 检查realm是否已安装
+if [ -f "/root/realm/realm" ]; then
+    realm_status="已安装"
+    realm_status_color="\033[0;32m" # 绿色
+else
+    realm_status="未安装"
+    realm_status_color="\033[0;31m" # 红色
+fi
 
 # 显示菜单的函数
 show_menu() {
