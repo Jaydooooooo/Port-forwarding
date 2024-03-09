@@ -2,9 +2,11 @@
 
 # 检查realm是否已安装
 if [ -f "/root/realm/realm" ]; then
+    echo "检测到realm已安装。"
     realm_status="已安装"
     realm_status_color="\033[0;32m" # 绿色
 else
+    echo "realm未安装。"
     realm_status="未安装"
     realm_status_color="\033[0;31m" # 红色
 fi
@@ -21,6 +23,7 @@ show_menu() {
     echo "================="
     echo -e "realm 状态：${realm_status_color}${realm_status}\033[0m"
 }
+
 
 # 部署环境的函数
 deploy_realm() {
