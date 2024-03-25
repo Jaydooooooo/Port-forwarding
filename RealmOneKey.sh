@@ -11,6 +11,15 @@ else
     realm_status_color="\033[0;31m" # 红色
 fi
 
+# 检查realm服务状态
+check_realm_service_status() {
+    if systemctl is-active --quiet realm; then
+        echo -e "\033[0;32m启用\033[0m" # 绿色
+    else
+        echo -e "\033[0;31m未启用\033[0m" # 红色
+    fi
+}
+
 # 显示菜单的函数
 show_menu() {
     clear
@@ -20,10 +29,12 @@ show_menu() {
     echo "2. 添加转发"
     echo "3. 删除转发"
     echo "4. 启动服务"
+    echo "5. 停止服务"
     echo "================="
     echo -e "realm 状态：${realm_status_color}${realm_status}\033[0m"
+    echo -n "realm 转发状态："
+    check_realm_service_status
 }
-
 
 # 部署环境的函数
 deploy_realm() {
@@ -81,6 +92,12 @@ start_service() {
     echo "realm服务已启动并设置为开机自启。"
 }
 
+# 停止服务
+stop_service() {
+    systemctl stop realm
+    echo "realm服务已停止。"
+}
+
 # 主循环
 while true; do
     show_menu
@@ -97,6 +114,9 @@ while true; do
             ;;
         4)
             start_service
+            ;;
+        5)
+            stop_service
             ;;
         *)
             echo "无效选项: $choice"
