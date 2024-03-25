@@ -30,6 +30,7 @@ show_menu() {
     echo "3. 删除转发"
     echo "4. 启动服务"
     echo "5. 停止服务"
+    echo "6. 一键卸载"
     echo "================="
     echo -e "realm 状态：${realm_status_color}${realm_status}\033[0m"
     echo -n "realm 转发状态："
@@ -57,6 +58,19 @@ RestartSec=5s
 DynamicUser=true
 WorkingDirectory=/root/realm
 ExecStart=/root/realm/realm -c /root/realm/config.toml
+
+# 卸载realm
+uninstall_realm() {
+    systemctl stop realm
+    systemctl disable realm
+    rm -f /etc/systemd/system/realm.service
+    systemctl daemon-reload
+    rm -rf /root/realm
+    echo "realm已被卸载。"
+    # 更新realm状态变量
+    realm_status="未安装"
+    realm_status_color="\033[0;31m" # 红色
+}
 
 [Install]
 WantedBy=multi-user.target" > /etc/systemd/system/realm.service
@@ -117,6 +131,9 @@ while true; do
             ;;
         5)
             stop_service
+            ;;
+        6)
+            uninstall_realm
             ;;
         *)
             echo "无效选项: $choice"
