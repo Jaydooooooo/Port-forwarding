@@ -81,6 +81,53 @@ WantedBy=multi-user.target" > /etc/systemd/system/realm.service
     echo "部署完成。"
 }
 
+# 删除转发规则的函数
+delete_forward() {
+    echo "当前转发规则："
+    local IFS=$'\n' # 设置IFS仅以换行符作为分隔符
+    local lines=($(grep -n 'remote =' /root/realm/config.toml)) # 搜索所有包含转发规则的行
+    if [ ${#lines[@]} -eq 0 ]; then
+        echo "没有发现任何转发规则。"
+        return
+    fi
+    local index=1
+    for line in "${lines[@]}"; do
+        echo "${index}. $(echo $line | cut -d '"' -f 2)" # 提取并显示端口信息
+        let index+=1
+    done
+
+    echo "请输入要删除的转发规则序号，直接按回车返回主菜单。"
+    read -p "选择: " choice
+    if [ -z "$choice" ]; then
+        echo "返回主菜单。"
+        return
+    fi
+
+    if ! [[ $choice =~ ^[0-9]+$ ]]; then
+        echo "无效输入，请输入数字。"
+        return
+    fi
+
+    if [ $choice -lt 1 ] || [ $choice -gt ${#lines[@]} ]; then
+        echo "选择超出范围，请输入有效序号。"
+        return
+    fi
+
+    local chosen_line=${lines[$((choice-1))]} # 根据用户选择获取相应行
+    local line_number=$(echo $chosen_line | cut -d ':' -f 1) # 获取行号
+
+    # 计算要删除的范围，从listen开始到remote结束
+    local start_line=$line_number
+    local end_line=$(($line_number + 2))
+
+    # 使用sed删除选中的转发规则
+    sed -i "${start_line},${end_line}d" /root/realm/config.toml
+
+    echo "转发规则已删除。"
+}
+
+
+
 # 添加转发规则
 add_forward() {
     while true; do
@@ -124,7 +171,7 @@ while true; do
             add_forward
             ;;
         3)
-            echo "此功能尚未实现。"
+            delete_forward
             ;;
         4)
             start_service
