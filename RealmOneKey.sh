@@ -41,7 +41,7 @@ show_menu() {
 deploy_realm() {
     mkdir -p /root/realm
     cd /root/realm
-    wget -O realm.tar.gz https://github.com/zhboner/realm/releases/download/v2.5.3/realm-x86_64-unknown-linux-gnu.tar.gz
+    wget -O realm.tar.gz https://github.com/zhboner/realm/releases/download/v2.6.0/realm-x86_64-unknown-linux-gnu.tar.gz
     tar -xvf realm.tar.gz
     chmod +x realm
     # 创建服务文件
@@ -59,6 +59,15 @@ DynamicUser=true
 WorkingDirectory=/root/realm
 ExecStart=/root/realm/realm -c /root/realm/config.toml
 
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/realm.service
+    systemctl daemon-reload
+    # 更新realm状态变量
+    realm_status="已安装"
+    realm_status_color="\033[0;32m" # 绿色
+    echo "部署完成。"
+}
+
 # 卸载realm
 uninstall_realm() {
     systemctl stop realm
@@ -70,15 +79,6 @@ uninstall_realm() {
     # 更新realm状态变量
     realm_status="未安装"
     realm_status_color="\033[0;31m" # 红色
-}
-
-[Install]
-WantedBy=multi-user.target" > /etc/systemd/system/realm.service
-    systemctl daemon-reload
-    # 更新realm状态变量
-    realm_status="已安装"
-    realm_status_color="\033[0;32m" # 绿色
-    echo "部署完成。"
 }
 
 # 删除转发规则的函数
@@ -126,8 +126,6 @@ delete_forward() {
     echo "转发规则已删除。"
 }
 
-
-
 # 添加转发规则
 add_forward() {
     while true; do
@@ -147,9 +145,10 @@ remote = \"$ip:$port\"" >> /root/realm/config.toml
 
 # 启动服务
 start_service() {
-    systemctl daemon-reload
-    systemctl restart realm
-    systemctl enable realm
+    sudo systemctl unmask realm.service
+    sudo systemctl daemon-reload
+    sudo systemctl restart realm.service
+    sudo systemctl enable realm.service
     echo "realm服务已启动并设置为开机自启。"
 }
 
